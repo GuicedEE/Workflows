@@ -51,7 +51,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        java-version: [ 24 ]
+        java-version: [ 25 ]
     name: ${{ inputs.name }} Builder
     steps:
       - uses: actions/checkout@v4
