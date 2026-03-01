@@ -99,6 +99,10 @@ jobs:
           servers: >
             [
               {
+                "id": "github",
+                "username": "${{secrets.USERNAME}}",
+                "password": "${{secrets.USER_TOKEN}}"
+              },{
                 "id": "packages",
                 "username": "${{secrets.USERNAME}}",
                 "password": "${{secrets.USER_TOKEN}}"
