@@ -46,6 +46,7 @@ permissions:
   packages: write
 env:
   GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+  MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
   GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
   POM_FILE: ${{inputs.baseDir}}pom.xml
 jobs:
