@@ -100,7 +100,6 @@ jobs:
       - name: Update Settings.xml
         uses: s4u/maven-settings-action@v4.0.0
         with:
-          apacheSnapshots: true
           sonatypeSnapshots: true
           servers: >
             [
