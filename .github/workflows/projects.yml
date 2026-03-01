@@ -168,7 +168,7 @@ jobs:
         if: ${{ inputs.sonarProjectName != '' }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{inputs.sonarProjectName}} -Dsonar.organization=${{inputs.sonarOrganization}} --file ${{inputs.baseDir}}pom.xml -U ${{inputs.publishToCentral == 'true' && '-Psonatype-distribution,release' || ' '}}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar deploy -Dsonar.projectKey=${{inputs.sonarProjectName}} -Dsonar.organization=${{inputs.sonarOrganization}} --file ${{inputs.baseDir}}pom.xml -U ${{inputs.publishToCentral == 'true' && '-Psonatype-distribution,release' || ' '}}
       - name: Build
         if: ${{ inputs.sonarProjectName == '' }}
         run:
