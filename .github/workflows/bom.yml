@@ -140,7 +140,7 @@ jobs:
         uses: actionctl/setup-maven-cli@v1
         with:
           maven_version: '4.0.0-rc-5'
-          download_url_pattern: 'https://dlcdn.apache.org/maven/maven-4/4.0.0-rc-5/binaries/apache-maven-4.0.0-rc-5-bin.tar.gz
+          download_url_pattern: 'https://dlcdn.apache.org/maven/maven-4/4.0.0-rc-5/binaries/apache-maven-4.0.0-rc-5-bin.tar.gz'
       - name: Build
         run:
           mvn -B deploy --file ${{inputs.baseDir}}pom.xml -U ${{inputs.publishToCentral == 'true' && '-Psonatype-distribution,release -Dgpg.passphrase=' || ' '}}${{inputs.publishToCentral == 'true' && secrets.GPG_PASSPHRASE || ' '}}
