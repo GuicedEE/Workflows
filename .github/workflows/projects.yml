@@ -27,6 +27,11 @@ on:
         required: false
         type: string
         default: 'false'
+      skipDeploy:
+        description: 'Skip deploy phase (build and verify only)'
+        required: false
+        type: string
+        default: 'false'
     secrets:
       USERNAME:
         required: true
@@ -165,11 +170,20 @@ jobs:
               }
             ]
       - name: Build and analyze
-        if: ${{ inputs.sonarProjectName != '' }}
+        if: ${{ inputs.sonarProjectName != '' && inputs.skipDeploy != 'true' }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar deploy -Dsonar.projectKey=${{inputs.sonarProjectName}} -Dsonar.organization=${{inputs.sonarOrganization}} --file ${{inputs.baseDir}}pom.xml -U ${{inputs.publishToCentral == 'true' && '-Psonatype-distribution,release' || '-Pcoverage '}}
+      - name: Build and analyze (no deploy)
+        if: ${{ inputs.sonarProjectName != '' && inputs.skipDeploy == 'true' }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{inputs.sonarProjectName}} -Dsonar.organization=${{inputs.sonarOrganization}} --file ${{inputs.baseDir}}pom.xml -U -Pcoverage
       - name: Build
-        if: ${{ inputs.sonarProjectName == '' }}
+        if: ${{ inputs.sonarProjectName == '' && inputs.skipDeploy != 'true' }}
         run:
           mvn -B deploy --file ${{inputs.baseDir}}pom.xml -U ${{inputs.publishToCentral == 'true' && '-Psonatype-distribution,release' || ' '}}
+      - name: Build (no deploy)
+        if: ${{ inputs.sonarProjectName == '' && inputs.skipDeploy == 'true' }}
+        run:
+          mvn -B verify --file ${{inputs.baseDir}}pom.xml -U
