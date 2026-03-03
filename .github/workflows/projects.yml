@@ -54,6 +54,8 @@ on:
 permissions:
   contents: read
   packages: write
+  pull-requests: write   # needed for PR decoration
+  checks: write          # needed for check run updates
 env:
   MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
   GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
@@ -168,21 +170,28 @@ jobs:
                 }
               }
             ]
-      - name: Build and analyze
-        if: ${{ inputs.sonarProjectName != '' && inputs.skipDeploy != 'true' }}
+
+      - name: Build + tests
+        run: mvn -B verify --file ${{inputs.baseDir}}pom.xml -U -Pcoverage
+
+      - name: SonarCloud analyze
+        uses: SonarSource/sonarqube-scan-action@v7
+        if: ${{ inputs.sonarProjectName != '' && inputs.sonarOrganization != '' && (github.event_name == 'pull_request' || github.event_name == 'push') }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar deploy -Dsonar.projectKey=${{inputs.sonarProjectName}} -Dsonar.organization=${{inputs.sonarOrganization}} --file ${{inputs.baseDir}}pom.xml -U ${{inputs.publishToCentral == 'true' && '-Psonatype-distribution,release' || '-Pcoverage '}}
-      - name: Build and analyze (no deploy)
-        if: ${{ inputs.sonarProjectName != '' && inputs.skipDeploy == 'true' }}
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${{inputs.sonarProjectName}} -Dsonar.organization=${{inputs.sonarOrganization}} --file ${{inputs.baseDir}}pom.xml -U -Pcoverage
-      - name: Build
-        if: ${{ inputs.sonarProjectName == '' && inputs.skipDeploy != 'true' }}
-        run:
-          mvn -B deploy --file ${{inputs.baseDir}}pom.xml -U ${{inputs.publishToCentral == 'true' && '-Psonatype-distribution,release' || ' '}}
-      - name: Build (no deploy)
-        if: ${{ inputs.sonarProjectName == '' && inputs.skipDeploy == 'true' }}
-        run:
-          mvn -B verify --file ${{inputs.baseDir}}pom.xml -U
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=${{ inputs.sonarProjectName }}
+            -Dsonar.organization=${{ inputs.sonarOrganization }}
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.projectBaseDir=${{ inputs.baseDir }}
+
+      - name: Deploy
+        if: ${{ inputs.skipDeploy != 'true' && inputs.publishToCentral != 'true' }}
+        run: mvn -B source:jar javadoc:jar install deploy --file ${{inputs.baseDir}}pom.xml -U
+
+      - name: Deploy to Central
+        if: ${{ inputs.skipDeploy != 'true' && inputs.publishToCentral == 'true' }}
+        run: mvn -B source:jar javadoc:jar install deploy --file ${{inputs.baseDir}}pom.xml -U -Psonatype-distribution,release
+
