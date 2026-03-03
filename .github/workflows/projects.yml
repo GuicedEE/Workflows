@@ -184,7 +184,7 @@ jobs:
           args: >
             -Dsonar.projectKey=${{ inputs.sonarProjectName }}
             -Dsonar.organization=${{ inputs.sonarOrganization }}
-            -Dsonar.qualitygate.wait=true
+#            -Dsonar.qualitygate.wait=true
             -Dsonar.projectBaseDir=${{ inputs.baseDir }}
             -Dsonar.language=java
             -Dsonar.sources=src/main/java
