@@ -32,6 +32,11 @@ on:
         required: false
         type: string
         default: 'false'
+      repository:
+        description: 'Alternative repository to checkout (e.g. owner/repo). Uses baseDir for subdirectory within the checked-out repo.'
+        required: false
+        type: string
+        default: ''
     secrets:
       USERNAME:
         required: true
@@ -59,7 +64,8 @@ permissions:
 env:
   MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
   GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-  POM_FILE: ${{inputs.baseDir}}pom.xml
+  EFFECTIVE_BASE_DIR: ${{ inputs.baseDir }}
+  POM_FILE: ${{ format('{0}pom.xml', inputs.baseDir) }}
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -73,6 +79,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          repository: ${{ inputs.repository || github.repository }}
+          token: ${{ secrets.USER_TOKEN || github.token }}
           submodules: 'recursive'
           fetch-depth: 0
           show-progress: 'true'
@@ -172,7 +180,7 @@ jobs:
             ]
 
       - name: Verify
-        run: mvn -B verify --file ${{inputs.baseDir}}pom.xml -U -Pcoverage
+        run: mvn -B verify --file ${{ env.EFFECTIVE_BASE_DIR }}pom.xml -U -Pcoverage
 
       - name: Print event name
         run: echo "github.event_name=${{ github.event_name }}"
@@ -187,7 +195,7 @@ jobs:
           args: >
             -Dsonar.projectKey=${{ inputs.sonarProjectName }}
             -Dsonar.organization=${{ inputs.sonarOrganization }}
-            -Dsonar.projectBaseDir=${{ inputs.baseDir }}
+            -Dsonar.projectBaseDir=${{ env.EFFECTIVE_BASE_DIR }}
             -Dsonar.language=java
             -Dsonar.sources=src/main/java
             -Dsonar.tests=src/test/java
@@ -200,9 +208,9 @@ jobs:
 
       - name: Deploy
         if: ${{ inputs.skipDeploy != 'true' && inputs.publishToCentral != 'true' }}
-        run: mvn -B source:jar javadoc:jar deploy --file ${{inputs.baseDir}}pom.xml -U -DskipTests=true
+        run: mvn -B source:jar javadoc:jar deploy --file ${{ env.EFFECTIVE_BASE_DIR }}pom.xml -U -DskipTests=true
 
       - name: Deploy to Central
         if: ${{ inputs.skipDeploy != 'true' && inputs.publishToCentral == 'true' }}
-        run: mvn -B source:jar javadoc:jar install deploy --file ${{inputs.baseDir}}pom.xml -U -Psonatype-distribution,release
+        run: mvn -B source:jar javadoc:jar install deploy --file ${{ env.EFFECTIVE_BASE_DIR }}pom.xml -U -Psonatype-distribution,release
 

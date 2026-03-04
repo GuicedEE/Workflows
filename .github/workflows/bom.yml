@@ -17,6 +17,11 @@ on:
         required: false
         type: string
         default: 'false'
+      repository:
+        description: 'Alternative repository to checkout (e.g. owner/repo). Uses baseDir for subdirectory within the checked-out repo.'
+        required: false
+        type: string
+        default: ''
     secrets:
       USERNAME:
         required: true
@@ -55,6 +60,9 @@ jobs:
     name: ${{ inputs.name }} Builder
     steps:
       - uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repository || github.repository }}
+          token: ${{ secrets.USER_TOKEN || github.token }}
       - name: Set up Java
         uses: actions/setup-java@v4.2.1
         with:
