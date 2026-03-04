@@ -81,9 +81,6 @@ jobs:
         with:
           repository: ${{ inputs.repository || github.repository }}
           token: ${{ secrets.USER_TOKEN || github.token }}
-          submodules: 'recursive'
-          fetch-depth: 0
-          show-progress: 'true'
       - name: Set up Java
         uses: actions/setup-java@v4.2.1
         with:
