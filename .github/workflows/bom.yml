@@ -4,7 +4,7 @@ on:
     inputs:
       baseDir:
         description: 'Base Directory with suffix /'
-        required: true
+        required: false
         type: string
         default: ''
       name:
