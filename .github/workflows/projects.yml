@@ -179,9 +179,6 @@ jobs:
       - name: Verify
         run: mvn -B verify --file ${{ env.EFFECTIVE_BASE_DIR }}pom.xml -U -Pcoverage
 
-      - name: Print event name
-        run: echo "github.event_name=${{ github.event_name }}"
-
       - name: SonarCloud analyze
         uses: SonarSource/sonarqube-scan-action@v7
         if: ${{ inputs.sonarProjectName != '' && inputs.sonarOrganization != '' && (github.event_name == 'pull_request' || github.event_name == 'push'  || github.event_name == 'workflow_dispatch' ) }}
