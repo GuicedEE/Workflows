@@ -213,5 +213,5 @@ jobs:
 
       - name: Deploy to Central
         if: ${{ inputs.skipDeploy != 'true' && inputs.publishToCentral == 'true' }}
-        run: mvn -B source:jar javadoc:jar install deploy --file ${{ env.EFFECTIVE_BASE_DIR }}pom.xml -U -Psonatype-distribution,release
+        run: mvn -B deploy --file ${{ env.EFFECTIVE_BASE_DIR }}pom.xml -U -Psonatype-distribution,release
 
