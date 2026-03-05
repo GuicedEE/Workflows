@@ -203,9 +203,13 @@ jobs:
             -Dsonar.exclusions=**/src/test/**,**/target/**
             -Dsonar.test.exclusions=**/src/test/**
 
-      - name: Deploy
+      - name: Source and Javadoc
         if: ${{ inputs.skipDeploy != 'true' && inputs.publishToCentral != 'true' }}
         run: mvn -B source:jar javadoc:jar deploy --file ${{ env.EFFECTIVE_BASE_DIR }}pom.xml -U -DskipTests=true
+
+      - name: Deploy
+        if: ${{ inputs.skipDeploy != 'true' && inputs.publishToCentral != 'true' }}
+        run: mvn -B deploy --file ${{ env.EFFECTIVE_BASE_DIR }}pom.xml -U -DskipTests=true
 
       - name: Deploy to Central
         if: ${{ inputs.skipDeploy != 'true' && inputs.publishToCentral == 'true' }}
