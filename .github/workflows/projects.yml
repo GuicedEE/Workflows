@@ -77,7 +77,7 @@ jobs:
         java-version: [ 25 ]
     name: ${{ inputs.name }} Builder
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6.0.2
         with:
           repository: ${{ inputs.repository || github.repository }}
           token: ${{ secrets.USER_TOKEN || github.token }}
@@ -92,13 +92,13 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE
       - name: Cache SonarQube packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5.0.4
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
       - name: Cache Maven packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5.0.4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}

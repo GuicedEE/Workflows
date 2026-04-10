@@ -59,7 +59,7 @@ jobs:
         java-version: [ 25 ]
     name: ${{ inputs.name }} Builder
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6.0.2
         with:
           repository: ${{ inputs.repository || github.repository }}
           token: ${{ secrets.USER_TOKEN || github.token }}
@@ -144,7 +144,7 @@ jobs:
               }
             ]
       - name: Cache Maven dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5.0.4
         with:
           path: ~/.m2/repository
           key: maven-cache-${{inputs.name}}
