@@ -129,6 +129,11 @@ jobs:
                 "password": "${{secrets.USER_TOKEN}}"
               },
               {
+                "id": "central",
+                "username": "${{secrets.SONA_USERNAME}}",
+                "password": "${{secrets.SONA_PASSWORD}}"
+              },
+              {
                 "id": "sona-snapshot",
                 "username": "${{secrets.SONA_USERNAME}}",
                 "password": "${{secrets.SONA_PASSWORD}}"
@@ -210,5 +215,5 @@ jobs:
 
       - name: Deploy to Central
         if: ${{ inputs.skipDeploy != 'true' && inputs.publishToCentral == 'true' }}
-        run: mvn -B deploy --file ${{ env.EFFECTIVE_BASE_DIR }}pom.xml -U -Psonatype-distribution,release
+        run: mvn -B deploy --file ${{ env.EFFECTIVE_BASE_DIR }}pom.xml -U -DskipTests=true -Dcentral.publishing.skip=false -Dmaven.deploy.skip=true
 

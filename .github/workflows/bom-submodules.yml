@@ -41,6 +41,7 @@ permissions:
   packages: write
 env:
   GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+  MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
   GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
 jobs:
   build:
@@ -50,7 +51,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        java-version: [ 21 ]
+        java-version: [ 25 ]
     name: ${{ inputs.name }} Builder
     steps:
       - uses: actions/checkout@v4
@@ -87,6 +88,11 @@ jobs:
                 "id": "packages_jwebmp",
                 "username": "${{secrets.USERNAME}}",
                 "password": "${{secrets.USER_TOKEN}}"
+              },
+              {
+                "id": "central",
+                "username": "${{secrets.SONA_USERNAME}}",
+                "password": "${{secrets.SONA_PASSWORD}}"
               },
               {
                 "id": "sona-snapshot",
@@ -143,6 +149,11 @@ jobs:
           restore-keys: |
             maven-cache-${{inputs.name}}
 
+      - name: Setup Maven
+        uses: actionctl/setup-maven-cli@v1
+        with:
+          maven_version: '4.0.0-rc-5'
+          download_url_pattern: 'https://dlcdn.apache.org/maven/maven-4/4.0.0-rc-5/binaries/apache-maven-4.0.0-rc-5-bin.tar.gz'
       - name: Build
         run:
-          mvn -B deploy --file ${{inputs.baseDir}}pom.xml -U ${{inputs.publishToCentral == 'true' && '-Psonatype-distribution,release -Dgpg.passphrase=' || ' '}}${{inputs.publishToCentral == 'true' && secrets.GPG_PASSPHRASE || ' '}} -Dmaven.test.failure.ignore=true
+          mvn -B deploy --file ${{inputs.baseDir}}pom.xml -U ${{inputs.publishToCentral == 'true' && '-Dcentral.publishing.skip=false -Dmaven.deploy.skip=true' || ' '}} -Dmaven.test.failure.ignore=true
