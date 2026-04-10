@@ -215,5 +215,5 @@ jobs:
 
       - name: Deploy to Central
         if: ${{ inputs.skipDeploy != 'true' && inputs.publishToCentral == 'true' }}
-        run: mvn -B deploy --file ${{ env.EFFECTIVE_BASE_DIR }}pom.xml -U -DskipTests=true -Dcentral.publishing.skip=false -Dmaven.deploy.skip=true
+        run: mvn -B deploy --file ${{ env.EFFECTIVE_BASE_DIR }}pom.xml -U -DskipTests=true -Dcentral.publishing.skip=false
 

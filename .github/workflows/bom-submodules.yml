@@ -156,4 +156,4 @@ jobs:
           download_url_pattern: 'https://dlcdn.apache.org/maven/maven-4/4.0.0-rc-5/binaries/apache-maven-4.0.0-rc-5-bin.tar.gz'
       - name: Build
         run:
-          mvn -B deploy --file ${{inputs.baseDir}}pom.xml -U ${{inputs.publishToCentral == 'true' && '-Dcentral.publishing.skip=false -Dmaven.deploy.skip=true' || ' '}} -Dmaven.test.failure.ignore=true
+          mvn -B deploy --file ${{inputs.baseDir}}pom.xml -U ${{inputs.publishToCentral == 'true' && '-Dcentral.publishing.skip=false' || ' '}} -Dmaven.test.failure.ignore=true
