@@ -205,15 +205,11 @@ jobs:
             -Dsonar.exclusions=**/src/test/**,**/target/**
             -Dsonar.test.exclusions=**/src/test/**
 
-      - name: Source and Javadoc
+      - name: Deploy to GitHub Packages
         if: ${{ inputs.skipDeploy != 'true' && inputs.publishToCentral != 'true' }}
         run: mvn -B source:jar javadoc:jar deploy --file ${{ env.EFFECTIVE_BASE_DIR }}pom.xml -U -DskipTests=true
 
-      - name: Deploy
-        if: ${{ inputs.skipDeploy != 'true' && inputs.publishToCentral != 'true' }}
-        run: mvn -B deploy --file ${{ env.EFFECTIVE_BASE_DIR }}pom.xml -U -DskipTests=true
-
       - name: Deploy to Central
         if: ${{ inputs.skipDeploy != 'true' && inputs.publishToCentral == 'true' }}
-        run: mvn -B deploy --file ${{ env.EFFECTIVE_BASE_DIR }}pom.xml -U -DskipTests=true -Dcentral.publishing.skip=false
+        run: mvn -B source:jar javadoc:jar deploy --file ${{ env.EFFECTIVE_BASE_DIR }}pom.xml -U -DskipTests=true -Dcentral.publishing.skip=false -Dmaven.deploy.skip=true
 
