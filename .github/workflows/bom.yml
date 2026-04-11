@@ -161,6 +161,6 @@ jobs:
       - name: Wait for Central propagation
         if: ${{ inputs.publishToCentral == 'true' }}
         run: |
-          DELAY=$((60 + RANDOM % 31))
+          DELAY=$((120 + RANDOM % 61))
           echo "Waiting ${DELAY}s for Maven Central to propagate artifacts…"
           sleep "$DELAY"
