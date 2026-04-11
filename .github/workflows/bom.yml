@@ -158,3 +158,9 @@ jobs:
       - name: Build
         run:
           mvn -B deploy --file ${{inputs.baseDir}}pom.xml -U ${{inputs.publishToCentral == 'true' && '-Dcentral.publishing.skip=false -Dmaven.deploy.skip=true' || ' '}}
+      - name: Wait for Central propagation
+        if: ${{ inputs.publishToCentral == 'true' }}
+        run: |
+          DELAY=$((60 + RANDOM % 31))
+          echo "Waiting ${DELAY}s for Maven Central to propagate artifacts…"
+          sleep "$DELAY"
