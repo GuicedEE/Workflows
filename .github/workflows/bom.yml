@@ -22,6 +22,11 @@ on:
         required: false
         type: string
         default: ''
+      createRelease:
+        description: 'Create a Git tag and GitHub Release after deploy (non-SNAPSHOT only)'
+        required: false
+        type: string
+        default: 'false'
     secrets:
       USERNAME:
         required: true
@@ -42,7 +47,7 @@ on:
         required: false
         description: 'A GPG private key '
 permissions:
-  contents: read
+  contents: write
   packages: write
 env:
   GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -52,7 +57,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
     strategy:
       matrix:
@@ -164,3 +169,31 @@ jobs:
           DELAY=$((120 + RANDOM % 61))
           echo "Waiting ${DELAY}s for Maven Central to propagate artifacts…"
           sleep "$DELAY"
+
+      - name: Create Release Tag
+        if: ${{ inputs.createRelease == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.USER_TOKEN || github.token }}
+        run: |
+          VERSION=$(grep -m1 '<version>' ${{ inputs.baseDir }}pom.xml | sed 's/.*<version>\(.*\)<\/version>.*/\1/')
+          if echo "$VERSION" | grep -q "SNAPSHOT"; then
+            echo "SNAPSHOT version ($VERSION) – skipping tag/release"
+            exit 0
+          fi
+          TAG="v${VERSION}"
+          if git tag -l "$TAG" | grep -q "$TAG"; then
+            echo "Tag $TAG already exists, skipping release creation"
+            exit 0
+          fi
+          echo "Creating tag $TAG"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "Release $VERSION"
+          git push origin "$TAG"
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            gh release create "$TAG" --title "Release $VERSION" --generate-notes --notes-start-tag "$PREV_TAG"
+          else
+            gh release create "$TAG" --title "Release $VERSION" --notes "Initial release $VERSION"
+          fi
+
