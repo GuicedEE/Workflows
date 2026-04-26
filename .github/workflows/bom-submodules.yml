@@ -37,7 +37,7 @@ on:
         required: false
         description: 'A GPG private key '
 permissions:
-  contents: read
+  contents: write
   packages: write
 env:
   GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
